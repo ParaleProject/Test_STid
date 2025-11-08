@@ -7,8 +7,9 @@
 import serial
 import time
 
+NB_CARACTERE = 60
 
-""" Classe pour la communication série"""
+""" Classe pour la communication série """
 class SerialCom:
 
     def __init__(self,port="COM3",bauds=9600, timeout=1):
@@ -49,8 +50,59 @@ class SerialCom:
         if self.com and self.com.isOpen():
             self.com.close()
 
+""" Classe pour définir les tests """
+class TestCase:
+
+    """ Initialisation de la classe """
+    def __init__(self):
+        print("Initialisation de la communication série")
+        self.robot_com = SerialCom()
+        time.sleep(1)
+        if self.robot_com.com.isOpen():
+            print("#" * NB_CARACTERE)
+            print("DEMARRAGE DES TESTS")
+            print("#" * NB_CARACTERE)
+
+    """ Fonction de fermeture de la communication série """
+    def close_com(self):
+        print("Fermeture de la communication série")
+        self.robot_com.close_serial()
+
+    """ Fonction de test unitaire """
+    def unit_test(self, test_name: str, command_to_send: str, expected_result: str, waiting_time: int = 0):
+
+        print("-" * NB_CARACTERE)
+        print(f"Description : {test_name}")
+
+        if waiting_time > 0:
+            print(f"Temps d'attente : {waiting_time} secondes")
+
+        print(f"Envoie : {command_to_send}")
+        result_cmd = self.robot_com.send_command(command_to_send)
+        print(f"Réponse : {result_cmd}")
+
+        print(f"Result : {"✅ PASS" if expected_result == result_cmd else "❌ FAIL"}")
+
+        print("-" * NB_CARACTERE)
+
+    def title_test(self, case_number: int, case_name: str):
+        print("=" * NB_CARACTERE)
+        print(f"CAS DE TEST {case_number} : {case_name}")
+        print("=" * NB_CARACTERE)
 
 if __name__ == "__main__":
-    serial_com = SerialCom()
-    response = serial_com.send_command("TEST")
-    print(response)
+    unit_tests_robot = TestCase()
+
+    unit_tests_robot.title_test(1, "Communication")
+
+    unit_tests_robot.unit_test("Envoyer une commande correcte", "/01 get pos","@01 OK 0")
+    unit_tests_robot.unit_test("Envoyer une commande incorrecte", "/01 run 10", "@01 RJ 0")
+    unit_tests_robot.unit_test("Envoyer une commande avec un identifiant invalide", "/00 get pos", "")
+    unit_tests_robot.unit_test("Envoyer une commande avec un identifiant inaccessible", "/20 get pos", "")
+    unit_tests_robot.unit_test("Envoyer une commande sans « / »", "01 get pos", "")
+    unit_tests_robot.unit_test("Envoyer une commande sans adresse", "/ get pos", "")
+    unit_tests_robot.unit_test("Vérifier la tolérance de la commande en ajoutant un espace au début", " /01 get pos", "@01 OK 0")
+    unit_tests_robot.unit_test("Vérifier la tolérance de la commande en ajoutant un espace à la fin", "/01 get pos ", "@01 OK 0")
+    unit_tests_robot.unit_test("Vérifier la tolérance de la commande en ajoutant un espace au milieu", "/01 get  pos", "@01 OK 0")
+
+    unit_tests_robot.close_com()
