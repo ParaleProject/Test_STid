@@ -46,7 +46,7 @@ Les règles à prendre en compte pour ces tests sont:
 -   Le buffer de communication est dit illimité et donc ne sera pas vérifier
     -   Exemple: (/01 move 10) envoyé 40 fois en 1 seconde =\> (@01 OK 0) 40 fois, donc /01 get pos =\> \@01 OK 400
 
-# Cas de test N°1: Syntaxe des commandes
+# Cas de test N°1 : Syntaxe des commandes
 
 **Description :**
 
